@@ -89,9 +89,7 @@ OVERRIDE_ARGS=(--override-engine-args "{${OVERRIDE_PAIRS}}")
 
 HTTP_PORT="${DYN_HTTP_PORT:-8000}"
 print_launch_banner "Launching Disaggregated on Same GPU (1 GPU)" "$MODEL" "$HTTP_PORT" \
-    "Max seq len: $MAX_SEQ_LEN" \
-    "GPU Mem:     ${GPU_MEM_FRACTION} per worker (~${_EW_TOTAL_GIB} GiB each)" \
-    "  estimate:  weights=${_EW_WEIGHTS_GIB} + kv=${_EW_KV_GIB} + overhead=${_EW_OVERHEAD_GIB} GiB"
+    "Workers:     2 (prefill + decode, fraction is per worker)"
 
 # run frontend
 # dynamo.frontend accepts either --http-port flag or DYN_HTTP_PORT env var (defaults to 8000)
