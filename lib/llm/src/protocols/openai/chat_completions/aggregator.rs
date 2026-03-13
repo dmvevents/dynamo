@@ -301,7 +301,7 @@ impl From<DeltaChoice> for dynamo_async_openai::types::ChatChoice {
         };
 
         // Determine content format based on what we accumulated
-        let content = if !delta.content_parts.is_empty() {
+        let mut content = if !delta.content_parts.is_empty() {
             // Multimodal response with content parts
             Some(ChatCompletionMessageContent::Parts(delta.content_parts))
         } else if !delta.text.is_empty() {
@@ -311,6 +311,19 @@ impl From<DeltaChoice> for dynamo_async_openai::types::ChatChoice {
             None
         };
 
+        // Nemotron-3-Super / reasoning model fallback: when finish_reason is Length
+        // (max_tokens hit) and content is empty but reasoning was generated, promote
+        // reasoning to content. Without this, clients (e.g. Claude Code) see only
+        // thinking tokens with no actual response, because the model spent all its
+        // token budget reasoning without emitting </think>.
+        let mut reasoning_content = delta.reasoning_content;
+        if content.is_none()
+            && finish_reason == Some(dynamo_async_openai::types::FinishReason::Length)
+            && reasoning_content.as_ref().is_some_and(|r| !r.is_empty())
+        {
+            content = reasoning_content.take().map(ChatCompletionMessageContent::Text);
+        }
+
         dynamo_async_openai::types::ChatChoice {
             message: dynamo_async_openai::types::ChatCompletionResponseMessage {
                 role: delta.role.expect("delta should have a Role"),
@@ -319,7 +332,7 @@ impl From<DeltaChoice> for dynamo_async_openai::types::ChatChoice {
                 refusal: None,
                 function_call: None,
                 audio: None,
-                reasoning_content: delta.reasoning_content,
+                reasoning_content,
             },
             index: delta.index,
             finish_reason,

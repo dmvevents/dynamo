@@ -360,6 +360,38 @@ impl AnthropicStreamConverter {
             events.push(make_sse_event("content_block_stop", &block_stop));
         }
 
+        // Reasoning model fallback: when stop_reason is MaxTokens and no text block
+        // was ever started (the model spent all its tokens reasoning without emitting
+        // </think>), emit an empty text block. Without this, Anthropic API clients
+        // like Claude Code see only thinking content with no response text, which
+        // causes the UI to appear stuck in "Thinking..." state.
+        if self.thinking_block_started
+            && !self.text_block_started
+            && self.stop_reason == Some(AnthropicStopReason::MaxTokens)
+        {
+            self.text_block_started = true;
+            self.text_block_index = self.next_block_index;
+            self.next_block_index += 1;
+
+            let block_start = AnthropicStreamEvent::ContentBlockStart {
+                index: self.text_block_index,
+                content_block: AnthropicResponseContentBlock::Text {
+                    text: String::new(),
+                    citations: None,
+                },
+            };
+            events.push(make_sse_event("content_block_start", &block_start));
+
+            // Emit a text delta indicating truncated reasoning
+            let block_delta = AnthropicStreamEvent::ContentBlockDelta {
+                index: self.text_block_index,
+                delta: AnthropicDelta::TextDelta {
+                    text: "[Reasoning exceeded token limit]".to_string(),
+                },
+            };
+            events.push(make_sse_event("content_block_delta", &block_delta));
+        }
+
         // Close text block if started and not already closed mid-stream
         if self.text_block_started && !self.text_block_closed {
             let block_stop = AnthropicStreamEvent::ContentBlockStop {
