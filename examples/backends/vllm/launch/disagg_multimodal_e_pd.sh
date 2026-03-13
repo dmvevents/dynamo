@@ -83,13 +83,13 @@ EXTRA_ARGS=""
 export DYN_VLLM_EMBEDDING_TRANSFER_MODE=${DYN_VLLM_EMBEDDING_TRANSFER_MODE:-"local"}
 
 # GPU assignments (override via environment variables)
-# DYN_GPU_MEMORY_FRACTION_OVERRIDE is the only external override honored here.
+# _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE is the only external override honored here.
 # In single-GPU mode, the override is split evenly between the two workers.
 if [[ "$SINGLE_GPU" == "true" ]]; then
     DYN_ENCODE_WORKER_GPU=${DYN_ENCODE_WORKER_GPU:-0}
     DYN_PD_WORKER_GPU=${DYN_PD_WORKER_GPU:-0}
-    if [[ -n "${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-}" ]]; then
-        HALF_FRAC=$(awk -v f="$DYN_GPU_MEMORY_FRACTION_OVERRIDE" 'BEGIN { printf "%.2f", f / 2 }')
+    if [[ -n "${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-}" ]]; then
+        HALF_FRAC=$(awk -v f="$_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE" 'BEGIN { printf "%.2f", f / 2 }')
         DYN_ENCODE_GPU_MEM=$HALF_FRAC
         DYN_PD_GPU_MEM=$HALF_FRAC
     else
@@ -102,9 +102,9 @@ if [[ "$SINGLE_GPU" == "true" ]]; then
 else
     DYN_ENCODE_WORKER_GPU=${DYN_ENCODE_WORKER_GPU:-1}
     DYN_PD_WORKER_GPU=${DYN_PD_WORKER_GPU:-2}
-    if [[ -n "${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-}" ]]; then
-        DYN_ENCODE_GPU_MEM=$DYN_GPU_MEMORY_FRACTION_OVERRIDE
-        DYN_PD_GPU_MEM=$DYN_GPU_MEMORY_FRACTION_OVERRIDE
+    if [[ -n "${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-}" ]]; then
+        DYN_ENCODE_GPU_MEM=$_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE
+        DYN_PD_GPU_MEM=$_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE
     else
         DYN_ENCODE_GPU_MEM=${DYN_ENCODE_GPU_MEM:-0.9}
         DYN_PD_GPU_MEM=${DYN_PD_GPU_MEM:-0.9}

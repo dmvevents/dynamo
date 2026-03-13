@@ -21,7 +21,7 @@ python -m dynamo.frontend --http-port="$HTTP_PORT" &
 # 2. Speculative Main Worker
 # ---------------------------
 # This runs the main model with EAGLE as the draft model for speculative decoding
-GPU_MEM_ARGS=("--gpu-memory-utilization" "${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-0.8}")
+GPU_MEM_ARGS=("--gpu-memory-utilization" "${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-0.8}")
 
 DYN_SYSTEM_ENABLED=true DYN_SYSTEM_PORT=8081 \
 CUDA_VISIBLE_DEVICES=0 python -m dynamo.vllm \

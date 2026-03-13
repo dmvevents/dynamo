@@ -114,7 +114,7 @@ mkdir -p $LOG_DIR
 # the GPU memory requires for vLLM reservation and runtime spike (not
 # reserved by vLLM) can be different and cause model fails to start,
 # adjust '--gpu-memory-utilization' as needed
-GPU_MEM_UTIL="${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-0.91}"
+GPU_MEM_UTIL="${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-0.91}"
 
 dp_start_rank=$((NODE_RANK * GPUS_PER_NODE))
 VLLM_NIXL_SIDE_CHANNEL_PORT=20096 \

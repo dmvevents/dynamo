@@ -25,8 +25,8 @@ python -m dynamo.frontend \
 # Use DYN_SYSTEM_PORT{1,2} so tests/launchers can provide a simple numbered port set.
 
 GPU_MEM_ARGS=()
-if [[ -n "${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-}" ]]; then
-    GPU_MEM_ARGS=("--gpu-memory-utilization" "$DYN_GPU_MEMORY_FRACTION_OVERRIDE")
+if [[ -n "${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-}" ]]; then
+    GPU_MEM_ARGS=("--gpu-memory-utilization" "$_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE")
 fi
 
 DYN_SYSTEM_PORT=${DYN_SYSTEM_PORT1:-8081} \

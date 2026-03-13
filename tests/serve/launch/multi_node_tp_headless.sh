@@ -13,8 +13,8 @@ trap 'echo "Cleaning up..."; kill 0' EXIT
 MODEL="${MODEL:-Qwen/Qwen3-0.6B}"
 
 GPU_MEM_ARGS=()
-if [[ -n "${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-}" ]]; then
-    GPU_MEM_ARGS=("--gpu-memory-utilization" "$DYN_GPU_MEMORY_FRACTION_OVERRIDE")
+if [[ -n "${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-}" ]]; then
+    GPU_MEM_ARGS=("--gpu-memory-utilization" "$_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE")
 fi
 
 echo "Starting Dynamo frontend..."

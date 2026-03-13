@@ -373,7 +373,7 @@ vllm_configs = {
     # NOTE: disagg_multimodal_epd.sh uses --kv-cache-memory-bytes=512MB for P/D
     # workers. Per vLLM CacheConfig, kv_cache_memory_bytes (when not-None) ignores
     # gpu_memory_utilization (ref: https://docs.vllm.ai/en/stable/api/vllm/config/cache/),
-    # so DYN_GPU_MEMORY_FRACTION_OVERRIDE has no effect. Regardless of GPU_MEM
+    # so _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE has no effect. Regardless of GPU_MEM
     # fractions (0.1/0.4/0.4), the 3 workers combined consistently use ~17.6 GiB
     # total on this GPU.
     "multimodal_disagg_qwen3vl_2b_epd": VLLMConfig(

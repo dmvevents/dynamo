@@ -15,13 +15,13 @@ in-process instrumentation.  Using NVML directly (the same C library that
 and allows high-frequency sampling.
 
 In **binary-search mode** (the default), the profiler sets the env var
-``DYN_GPU_MEMORY_FRACTION_OVERRIDE`` to a value between 0.05 and 0.95 and
+``_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE`` to a value between 0.05 and 0.95 and
 re-runs the test at each midpoint.  If the test passes, the fraction is lowered;
 if it OOMs, the fraction is raised — standard bisection to find the minimum
 VRAM the test needs.  The peak ``memory.used`` from the last passing run
 (plus a 10 % safety margin) becomes the ``@pytest.mark.max_vram_gib`` recommendation.
 
-**IMPORTANT**: The test under profile **MUST** honor ``DYN_GPU_MEMORY_FRACTION_OVERRIDE``
+**IMPORTANT**: The test under profile **MUST** honor ``_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE``
 — either directly (see ``test_mock_gpu_alloc.py``) or via launch scripts that
 pass it as ``--gpu-memory-utilization`` to vLLM (e.g. ``agg.sh``).  If the test
 ignores this variable, every probe will pass at the same peak and the profiler
@@ -683,9 +683,9 @@ def _find_min_vram(
     recommend: bool = True,
     csv_path: str | None = None,
 ) -> int:
-    """Binary search DYN_GPU_MEMORY_FRACTION_OVERRIDE to find the minimum VRAM a test needs.
+    """Binary search _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE to find the minimum VRAM a test needs.
 
-    Sets DYN_GPU_MEMORY_FRACTION_OVERRIDE env var (honored by agg.sh and similar scripts),
+    Sets _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE env var (honored by agg.sh and similar scripts),
     runs the test at each profile point, and bisects until the boundary is found.
     """
     gpu_info = _query_gpu_stats()
@@ -718,7 +718,7 @@ def _find_min_vram(
         )
         print("  Another process is hogging the GPU. Results will be inaccurate")
         print(
-            "  because DYN_GPU_MEMORY_FRACTION_OVERRIDE is a fraction of TOTAL memory,"
+            "  because _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE is a fraction of TOTAL memory,"
         )
         print("  not FREE memory. Kill other GPU processes first.")
         print(f"  {'!' * 72}")
@@ -742,7 +742,7 @@ def _find_min_vram(
 
     # First, verify the test passes at hi (0.95)
     print(
-        f"  [profile 1/{max_iterations + 1}] DYN_GPU_MEMORY_FRACTION_OVERRIDE={hi:.2f} "
+        f"  [profile 1/{max_iterations + 1}] _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE={hi:.2f} "
         f"(allowed max GPU {hi * total_gib:.1f} GiB)  [validation run]"
     )
     sys.stdout.flush()
@@ -753,7 +753,7 @@ def _find_min_vram(
         interval=interval,
         baseline_seconds=baseline_seconds,
         teardown_seconds=teardown_seconds,
-        extra_env={"DYN_GPU_MEMORY_FRACTION_OVERRIDE": f"{hi:.2f}"},
+        extra_env={"_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE": f"{hi:.2f}"},
         quiet=True,
         run_label=label,
     )
@@ -797,7 +797,7 @@ def _find_min_vram(
         label = f"profile {probe_num}/{max_iterations + 1}"
         print(
             f"\n  [{label}] "
-            f"DYN_GPU_MEMORY_FRACTION_OVERRIDE={mid:.2f} "
+            f"_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE={mid:.2f} "
             f"(allowed max GPU {mid * total_gib:.1f} GiB)  "
             f"[~{remaining} iters left, profiling ETA ~{eta_s:.0f}s]"
         )
@@ -834,7 +834,7 @@ def _find_min_vram(
             interval=interval,
             baseline_seconds=baseline_seconds,
             teardown_seconds=teardown_seconds,
-            extra_env={"DYN_GPU_MEMORY_FRACTION_OVERRIDE": f"{mid:.2f}"},
+            extra_env={"_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE": f"{mid:.2f}"},
             quiet=True,
             run_label=label,
             timeout=probe_timeout,
@@ -872,7 +872,7 @@ def _find_min_vram(
                 f"OOM or error, iter took {iter_elapsed:.0f}s"
             )
 
-    # Detect if DYN_GPU_MEMORY_FRACTION_OVERRIDE is being ignored: all peaks are nearly
+    # Detect if _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE is being ignored: all peaks are nearly
     # identical despite wildly different utilization caps.
     if len(all_peak_mibs) >= 3:
         peak_range = max(all_peak_mibs) - min(all_peak_mibs)
@@ -883,13 +883,13 @@ def _find_min_vram(
                 f"{len(all_peak_mibs)} probes (range: {peak_range} MiB)."
             )
             print(
-                "  This strongly suggests the test IGNORES the DYN_GPU_MEMORY_FRACTION_OVERRIDE"
+                "  This strongly suggests the test IGNORES the _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE"
             )
             print("  env var.  Binary search results are UNRELIABLE — no marker")
             print("  recommendation will be provided.")
             print("  ")
             print(
-                "  FIX: The test (or its launch script) must read DYN_GPU_MEMORY_FRACTION_OVERRIDE"
+                "  FIX: The test (or its launch script) must read _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE"
             )
             print("  and pass --gpu-memory-utilization to vLLM / the engine.")
             print("  See tests/README.md 'GPU VRAM Profiler' for details.")

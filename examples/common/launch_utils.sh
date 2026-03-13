@@ -140,7 +140,7 @@ print_launch_banner() {
     # Scripts set MAX_MODEL_LEN (vllm/trtllm) or CONTEXT_LENGTH (sglang) before calling.
     if [[ -n "${_EW_TOTAL_GIB:-}" ]]; then
         local _seq_len="${MAX_MODEL_LEN:-${CONTEXT_LENGTH:-${MAX_SEQ_LEN:-}}}"
-        local _frac="${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-${GPU_MEM_FRACTION:-}}"
+        local _frac="${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-${GPU_MEM_FRACTION:-}}"
         [[ -n "$_seq_len" ]] && echo "Max seq len: $_seq_len"
         if [[ -n "$_frac" ]]; then
             echo "GPU frac:    $_frac (~${_EW_TOTAL_GIB} GiB estimated)"

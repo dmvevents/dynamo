@@ -99,7 +99,7 @@ class VllmWorkerProcess(ManagedProcess):
             "32768",
         ]
 
-        gpu_util = os.environ.get("DYN_GPU_MEMORY_FRACTION_OVERRIDE")
+        gpu_util = os.environ.get("_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE")
         if gpu_util:
             command.extend(["--gpu-memory-utilization", gpu_util])
 

@@ -5,7 +5,7 @@
 # Disaggregated prefill/decode on a SINGLE GPU.
 # Per-worker VRAM is estimated from model parameters below. Override individual
 # knobs (CONTEXT_LENGTH, MAX_RUNNING_REQUESTS) via env vars, or set
-# DYN_GPU_MEMORY_FRACTION_OVERRIDE to bypass the calculation entirely.
+# _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE to bypass the calculation entirely.
 #
 # Measured reference (Qwen/Qwen3-0.6B, --context-length 4096, RTX 6000 Ada 48 GiB):
 #   estimate (from gpu_utils.sh) : ~5.7 GiB per worker (w=1.1 + kv=0.9 + oh=3.7)
@@ -30,10 +30,10 @@ MAX_RUNNING_REQUESTS="${MAX_RUNNING_REQUESTS:-2}"
 # Sets _EW_WEIGHTS_GIB, _EW_KV_GIB, _EW_OVERHEAD_GIB, _EW_TOTAL_GIB
 estimate_worker_vram "$MODEL" "$CONTEXT_LENGTH" "$MAX_RUNNING_REQUESTS" sglang
 
-# DYN_GPU_MEMORY_FRACTION_OVERRIDE takes precedence (profiler binary search).
+# _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE takes precedence (profiler binary search).
 # In single-GPU mode, split the override evenly between the two workers.
-if [[ -n "${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-}" ]]; then
-    GPU_MEM_FRACTION=$(awk -v f="$DYN_GPU_MEMORY_FRACTION_OVERRIDE" 'BEGIN { printf "%.2f", f / 2 }')
+if [[ -n "${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-}" ]]; then
+    GPU_MEM_FRACTION=$(awk -v f="$_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE" 'BEGIN { printf "%.2f", f / 2 }')
 else
     GPU_MEM_FRACTION=$(gpu_worker_fraction sglang)
 fi

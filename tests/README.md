@@ -440,13 +440,13 @@ When writing or reviewing GPU tests, use `tests/utils/profile_pytest.py` to meas
 
 ### How it works
 
-The profiler sets the `DYN_GPU_MEMORY_FRACTION_OVERRIDE` environment variable (a fraction from 0.0 to 1.0 of total GPU RAM) and runs the test at each probe point. It bisects between "passes" and "OOM/fails" to find the boundary. After the search, it samples `nvidia-smi` to report peak VRAM, phase analysis, and marker recommendations.
+The profiler sets the `_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE` environment variable (a fraction from 0.0 to 1.0 of total GPU RAM) and runs the test at each probe point. It bisects between "passes" and "OOM/fails" to find the boundary. After the search, it samples `nvidia-smi` to report peak VRAM, phase analysis, and marker recommendations.
 
-**Requirement:** The test under profile **must** honor the `DYN_GPU_MEMORY_FRACTION_OVERRIDE` env var. For standalone tests that allocate CUDA memory directly, check `os.environ.get("DYN_GPU_MEMORY_FRACTION_OVERRIDE")` and cap your allocation accordingly — see `tests/utils/test_mock_gpu_alloc.py` for an example.
+**Requirement:** The test under profile **must** honor the `_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE` env var. For standalone tests that allocate CUDA memory directly, check `os.environ.get("_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE")` and cap your allocation accordingly — see `tests/utils/test_mock_gpu_alloc.py` for an example.
 
 ### Engine-specific mapping
 
-`DYN_GPU_MEMORY_FRACTION_OVERRIDE` is a generic env var (float 0.0-1.0) that launch scripts translate to the engine-specific CLI flag:
+`_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE` is a generic env var (float 0.0-1.0) that launch scripts translate to the engine-specific CLI flag:
 
 | Engine  | CLI flag                         | Launch script support |
 |---------|----------------------------------|-----------------------|
@@ -454,7 +454,7 @@ The profiler sets the `DYN_GPU_MEMORY_FRACTION_OVERRIDE` environment variable (a
 | SGLang  | `--mem-fraction-static`          | Not yet implemented (TODO) |
 | TRT-LLM | `--free-gpu-memory-fraction`    | Not yet implemented (has its own `DYN_TRTLLM_FREE_GPU_MEMORY_FRACTION`, TODO: unify) |
 
-Scripts that already hard-code their own memory fraction (e.g. `agg_multimodal.sh` with 0.85) have a TODO to honor `DYN_GPU_MEMORY_FRACTION_OVERRIDE` in the future. If the profiler detects constant VRAM across all probes (meaning the env var is ignored), it prints a warning and skips marker recommendations.
+Scripts that already hard-code their own memory fraction (e.g. `agg_multimodal.sh` with 0.85) have a TODO to honor `_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE` in the future. If the profiler detects constant VRAM across all probes (meaning the env var is ignored), it prints a warning and skips marker recommendations.
 
 ### Usage
 
@@ -480,13 +480,13 @@ FIND MINIMUM VRAM (binary search)
   Range   : 5% - 95%  (tolerance 5%)
   Max iter: 6 (1 validation + 5 bisections)
 
-  [probe 1/6] DYN_GPU_MEMORY_FRACTION_OVERRIDE=0.95 (45.6 GiB)  [validation run]
+  [probe 1/6] _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE=0.95 (45.6 GiB)  [validation run]
   [PASS] peak 18.5 GiB, wall 41s, iter took 49s
   ...
-  [probe 5/6] DYN_GPU_MEMORY_FRACTION_OVERRIDE=0.33 (15.9 GiB)
+  [probe 5/6] _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE=0.33 (15.9 GiB)
   [FAIL] OOM or error at 33% (15.9 GiB), iter took 30s
 
-  [probe 6/6] DYN_GPU_MEMORY_FRACTION_OVERRIDE=0.36 (17.2 GiB)  [~0 left, ETA ~0s]
+  [probe 6/6] _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE=0.36 (17.2 GiB)  [~0 left, ETA ~0s]
   [PASS] peak 18.5 GiB, wall 41s, iter took 49s
 
 ========================================================================

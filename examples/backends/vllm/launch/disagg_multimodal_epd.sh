@@ -87,10 +87,10 @@ DYN_DECODE_WORKER_GPU=${DYN_DECODE_WORKER_GPU:-2}
 # --gpu-memory-utilization for KV cache sizing. Per vLLM CacheConfig:
 # "kv_cache_memory_bytes (when not-None) ignores gpu_memory_utilization"
 # Ref: https://docs.vllm.ai/en/stable/api/vllm/config/cache/
-# Therefore DYN_GPU_MEMORY_FRACTION_OVERRIDE has no effect on actual VRAM
+# Therefore _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE has no effect on actual VRAM
 # usage when --kv-cache-memory-bytes is set.
-if [[ -n "${DYN_GPU_MEMORY_FRACTION_OVERRIDE:-}" ]]; then
-    echo "WARNING: DYN_GPU_MEMORY_FRACTION_OVERRIDE is set but has no effect here because" >&2
+if [[ -n "${_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE:-}" ]]; then
+    echo "WARNING: _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE is set but has no effect here because" >&2
     echo "  --kv-cache-memory-bytes overrides --gpu-memory-utilization in vLLM." >&2
 fi
 DYN_ENCODE_GPU_MEM=${DYN_ENCODE_GPU_MEM:-0.9}

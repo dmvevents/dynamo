@@ -19,18 +19,18 @@ ALLOC_MIB = 4096  # 4 GiB
 @pytest.mark.gpu_1
 @pytest.mark.timeout(30)
 def test_mock_4gb_gpu_alloc():
-    """Allocate 4 GiB of GPU VRAM, hold 2s, release. Honors DYN_GPU_MEMORY_FRACTION_OVERRIDE."""
+    """Allocate 4 GiB of GPU VRAM, hold 2s, release. Honors _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE."""
     if not torch.cuda.is_available():
         pytest.skip("CUDA not available")
 
     device = 0
     total_mib = torch.cuda.get_device_properties(device).total_memory / (1024 * 1024)
 
-    gpu_util = os.environ.get("DYN_GPU_MEMORY_FRACTION_OVERRIDE")
+    gpu_util = os.environ.get("_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE")
     if gpu_util is not None:
         cap_mib = total_mib * float(gpu_util)
         logger.info(
-            "DYN_GPU_MEMORY_FRACTION_OVERRIDE=%.2f -> cap %.0f MiB (%.1f GiB) of %.0f MiB total",
+            "_PROFILE_PYTEST_VRAM_FRAC_OVERRIDE=%.2f -> cap %.0f MiB (%.1f GiB) of %.0f MiB total",
             float(gpu_util),
             cap_mib,
             cap_mib / 1024,
@@ -38,7 +38,7 @@ def test_mock_4gb_gpu_alloc():
         )
         if ALLOC_MIB > cap_mib:
             raise RuntimeError(
-                f"Requested {ALLOC_MIB} MiB exceeds DYN_GPU_MEMORY_FRACTION_OVERRIDE "
+                f"Requested {ALLOC_MIB} MiB exceeds _PROFILE_PYTEST_VRAM_FRAC_OVERRIDE "
                 f"cap of {cap_mib:.0f} MiB ({gpu_util})"
             )
 
