@@ -53,8 +53,9 @@ logger = logging.getLogger(__name__)
 
 
 class VllmEngineQuiesceController:
-    def __init__(self, engine_client: Any):
+    def __init__(self, engine_client: Any, *, manage_generation: bool = True):
         self._engine_client = engine_client
+        self._manage_generation = manage_generation
         self._is_quiesced = False
 
     @property
@@ -66,7 +67,8 @@ class VllmEngineQuiesceController:
             return False
 
         level = args[0] if args else None
-        await self._engine_client.pause_generation()
+        if self._manage_generation:
+            await self._engine_client.pause_generation()
         if level is None:
             await self._engine_client.sleep()
         else:
@@ -79,7 +81,8 @@ class VllmEngineQuiesceController:
             return False
 
         await self._engine_client.wake_up()
-        await self._engine_client.resume_generation()
+        if self._manage_generation:
+            await self._engine_client.resume_generation()
         return True
 
     def mark_resumed(self) -> None:

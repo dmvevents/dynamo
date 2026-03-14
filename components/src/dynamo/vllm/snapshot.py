@@ -40,7 +40,9 @@ async def prepare_snapshot_engine(
     engine = setup_vllm_engine(config)
     snapshot_controller = EngineSnapshotController(
         engine=engine,
-        quiesce_controller=VllmEngineQuiesceController(engine[0]),
+        quiesce_controller=VllmEngineQuiesceController(
+            engine[0], manage_generation=False
+        ),
         checkpoint_config=checkpoint_config,
         quiesce_args=(None,),
     )
