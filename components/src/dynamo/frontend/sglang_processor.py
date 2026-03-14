@@ -384,12 +384,15 @@ class SglangProcessor:
 
         try:
             if self.is_kv_router:
+                nvext = request.get("nvext") or {}
                 dynamo_stream = await self.router.generate(
                     token_ids=tokens,
                     model=dynamo_preproc["model"],
                     stop_conditions=dynamo_preproc["stop_conditions"],
                     sampling_options=dynamo_preproc["sampling_options"],
                     output_options=dynamo_preproc["output_options"],
+                    worker_id=nvext.get("decode_worker_id")
+                    or nvext.get("backend_instance_id"),
                 )
             else:
                 dynamo_stream = await self.router.generate(
