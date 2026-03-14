@@ -42,7 +42,7 @@ async def prepare_snapshot_engine(
         engine=engine,
         quiesce_controller=VllmEngineQuiesceController(engine[0]),
         checkpoint_config=checkpoint_config,
-        quiesce_args=(config.sleep_mode_level,),
+        quiesce_args=(None,),
     )
     if not await snapshot_controller.wait_for_restore():
         return True, None
