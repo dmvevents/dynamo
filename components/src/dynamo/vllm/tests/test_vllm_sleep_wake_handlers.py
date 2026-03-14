@@ -100,7 +100,9 @@ async def test_snapshot_quiesce_skips_generation_pause_and_resume():
         resume_generation=AsyncMock(),
     )
     controller = VllmEngineQuiesceController(
-        engine_client, manage_generation=False
+        engine_client,
+        manage_generation=False,
+        wake_tags=["weights", "kv_cache"],
     )
 
     changed = await controller.quiesce(None)
@@ -110,7 +112,7 @@ async def test_snapshot_quiesce_skips_generation_pause_and_resume():
     assert resumed is True
     engine_client.pause_generation.assert_not_awaited()
     engine_client.sleep.assert_awaited_once_with()
-    engine_client.wake_up.assert_awaited_once_with()
+    engine_client.wake_up.assert_awaited_once_with(["weights", "kv_cache"])
     engine_client.resume_generation.assert_not_awaited()
 
 
